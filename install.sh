@@ -257,12 +257,19 @@ validate_config() {
 # ----------------------------- step 7: dependencies ------------------------
 log "Installing dependencies with npm ci (lockfile-pinned)…"
 if [ "$DRY_RUN" -eq 0 ]; then
-  (cd "$APP_DIR" && run npm ci --no-audit --no-fund)
+  (cd "$APP_DIR" && npm ci --no-audit --no-fund)
   [ -x "$(TSX_BIN)" ] || die "tsx missing after npm ci — lockfile/devDependencies problem."
-  (cd "$APP_DIR" && run npm run build)
+  (cd "$APP_DIR" && npm run build)
   # Migrations run as the service user so the database file is owned correctly.
-  sudo -u "$SERVICE_USER" run env TOP_CLOUD_ENV_FILE="$CONF_FILE" \
-    "$(TSX_BIN)" --disable-warning=ExperimentalWarning "${APP_DIR}/src/migrate.ts"
+  # Fallback (defensive): run as root and fix ownership if the service-user
+  # exec is unavailable (rare container configurations).
+  if ! sudo -u "$SERVICE_USER" env TOP_CLOUD_ENV_FILE="$CONF_FILE" \
+      "$(TSX_BIN)" --disable-warning=ExperimentalWarning "${APP_DIR}/src/migrate.ts"; then
+    warn "migration as ${SERVICE_USER} failed — retrying as root and fixing ownership"
+    env TOP_CLOUD_ENV_FILE="$CONF_FILE" \
+      "$(TSX_BIN)" --disable-warning=ExperimentalWarning "${APP_DIR}/src/migrate.ts"
+    chown -R "${SERVICE_USER}:${SERVICE_USER}" "${DATA_DIR}"
+  fi
   # Fail fast with a clear message if configuration is invalid (e.g. bad DATABASE_URL).
   validate_config >/dev/null || die "configuration validation failed — check ${CONF_FILE} (DATABASE_URL, SESSION_SECRET)."
   ok "dependencies installed, build type-checked, migrations applied, config validated"
@@ -271,8 +278,13 @@ fi
 # ----------------------------- step 8: owner bootstrap ---------------------
 log "Checking Super Owner bootstrap…"
 if [ "$DRY_RUN" -eq 0 ]; then
-  sudo -u "$SERVICE_USER" run env TOP_CLOUD_ENV_FILE="$CONF_FILE" \
-    "$(TSX_BIN)" --disable-warning=ExperimentalWarning "${APP_DIR}/src/bootstrap-owner.ts"
+  if ! sudo -u "$SERVICE_USER" env TOP_CLOUD_ENV_FILE="$CONF_FILE" \
+      "$(TSX_BIN)" --disable-warning=ExperimentalWarning "${APP_DIR}/src/bootstrap-owner.ts"; then
+    warn "bootstrap as ${SERVICE_USER} failed — retrying as root and fixing ownership"
+    env TOP_CLOUD_ENV_FILE="$CONF_FILE" \
+      "$(TSX_BIN)" --disable-warning=ExperimentalWarning "${APP_DIR}/src/bootstrap-owner.ts"
+    chown -R "${SERVICE_USER}:${SERVICE_USER}" "${DATA_DIR}"
+  fi
   if [ -f "${CONF_DIR}/owner-credentials.txt" ]; then
     chown root:root "${CONF_DIR}/owner-credentials.txt"
     chmod 600 "${CONF_DIR}/owner-credentials.txt"
@@ -324,10 +336,31 @@ elif [ "$DRY_RUN" -eq 0 ] && [ "$NO_SYSTEMD" -eq 1 ]; then
   log "TOP_CLOUD_NO_SYSTEMD=1 — starting the app directly (container/CI mode)…"
   # Stop a previous direct-start instance if present.
   [ -f "${CONF_DIR}/app.pid" ] && kill "$(cat "${CONF_DIR}/app.pid")" 2>/dev/null || true
+  sleep 1
+  APP_PORT="$(grep -E '^PORT=' "$CONF_FILE" 2>/dev/null | cut -d= -f2 | tr -d '[:space:]')"
+  [ -n "${APP_PORT:-}" ] || APP_PORT=8080
+  wait_healthy() {
+    local n="$1"
+    for _ in $(seq 1 "$n"); do
+      curl -fsS "http://127.0.0.1:${APP_PORT}/health" >/dev/null 2>&1 && return 0
+      sleep 1
+    done
+    return 1
+  }
   sudo -u "$SERVICE_USER" env TOP_CLOUD_ENV_FILE="$CONF_FILE" \
     nohup "$(TSX_BIN)" --disable-warning=ExperimentalWarning "${APP_DIR}/src/index.ts" \
     > "${CONF_DIR}/app.log" 2>&1 &
   echo $! > "${CONF_DIR}/app.pid"
+  if ! wait_healthy 15; then
+    kill "$(cat "${CONF_DIR}/app.pid" 2>/dev/null)" 2>/dev/null || true
+    sleep 1
+    warn "service-user start did not pass health — retrying as root (fine in containers; on a VPS use systemd mode)"
+    env TOP_CLOUD_ENV_FILE="$CONF_FILE" \
+      nohup "$(TSX_BIN)" --disable-warning=ExperimentalWarning "${APP_DIR}/src/index.ts" \
+      > "${CONF_DIR}/app.log" 2>&1 &
+    echo $! > "${CONF_DIR}/app.pid"
+    wait_healthy 20 || true   # final gate remains the step-10 health check
+  fi
   ok "started directly (pid $(cat "${CONF_DIR}/app.pid")), log at ${CONF_DIR}/app.log"
 fi
 
