@@ -1,0 +1,26 @@
+<%
+  // Expected locals: total, perPage, page, reqUrl (full URL with query),
+  // q (optional object of non-page params to preserve).
+  const pages = Math.max(1, Math.ceil(total / perPage));
+  function href(p) {
+    const u = new URL(reqUrl, 'http://x');
+    u.searchParams.set('page', String(p));
+    return u.pathname + (u.search || '');
+  }
+%>
+<% if (pages > 1) { %>
+<nav class="pagination" aria-label="Pagination">
+  <% if (page > 1) { %><a href="<%= href(page - 1) %>">← Prev</a><% } %>
+  <% let lastDot = 0; %>
+  <% for (let p = 1; p <= pages; p++) { %>
+    <% if (p === 1 || p === pages || Math.abs(p - page) <= 2) { %>
+      <% if (p === page) { %><span class="current"><%= p %></span><% } else { %><a href="<%= href(p) %>"><%= p %></a><% } %>
+      <% lastDot = p; %>
+    <% } else if (p - lastDot === 1) { %>
+      <% lastDot = p; %>
+      <span class="dots">…</span>
+    <% } %>
+  <% } %>
+  <% if (page < pages) { %><a href="<%= href(page + 1) %>">Next →</a><% } %>
+</nav>
+<% } %>

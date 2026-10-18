@@ -1,0 +1,51 @@
+<%- include('../partials/head', { title, active: 'login' }) %>
+
+<div class="auth-wrap">
+  <div class="card auth-card">
+    <h1>Create your account</h1>
+    <p class="sub">One account for every application and staff message.</p>
+    <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+    <form method="post" action="/register" class="stack" data-validate="1" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="field">
+        <label for="username">Username <span class="req">*</span></label>
+        <input type="text" id="username" name="username" required minlength="3" maxlength="32"
+          pattern="[a-zA-Z0-9._-]+" value="<%= values.username || '' %>" autocomplete="username"
+          class="<%= error ? 'invalid' : '' %>">
+        <div class="hint">3–32 characters: letters, numbers, dot, dash or underscore.</div>
+      </div>
+      <div class="field">
+        <label for="email">Email <span class="req">*</span></label>
+        <input type="email" id="email" name="email" required maxlength="200"
+          value="<%= values.email || '' %>" autocomplete="email" class="<%= error ? 'invalid' : '' %>">
+      </div>
+      <div class="field">
+        <label for="display_name">Display name <span class="req">*</span></label>
+        <input type="text" id="display_name" name="display_name" required minlength="2" maxlength="80"
+          value="<%= values.display_name || '' %>" class="<%= error ? 'invalid' : '' %>">
+        <div class="hint">The name reviewers see next to your application.</div>
+      </div>
+      <div class="field">
+        <label for="password">Password <span class="req">*</span></label>
+        <input type="password" id="password" name="password" required minlength="10" maxlength="200"
+          autocomplete="new-password" class="<%= error ? 'invalid' : '' %>">
+        <div class="hint">At least 10 characters with letters and numbers.</div>
+        <div class="pw-strength" id="pwStrength" aria-live="polite"></div>
+      </div>
+      <div class="field">
+        <label for="password2">Confirm password <span class="req">*</span></label>
+        <input type="password" id="password2" name="password2" required minlength="10" maxlength="200"
+          autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary" type="submit">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-label">Create account</span>
+      </button>
+    </form>
+    <div class="auth-alt">
+      Already have an account? <a href="/login">Sign in</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

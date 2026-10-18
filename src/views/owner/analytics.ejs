@@ -1,0 +1,60 @@
+<%- include('../partials/head', { title, active: 'owner' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Analytics</h1>
+    <p class="muted small mb0">Application volume and pipeline health.</p>
+  </div>
+  <div class="dash-tabs" role="navigation" aria-label="Dashboards">
+    <a href="/admin">Admin</a>
+    <a href="/admin/owner" class="active">Owner</a>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="card stat"><div class="num"><%= total %></div><div class="lbl">Total applications</div></div>
+  <div class="card stat"><div class="num"><%= counts.pending %></div><div class="lbl">Pending</div></div>
+  <div class="card stat"><div class="num"><%= counts.approved %></div><div class="lbl">Approved</div></div>
+  <div class="card stat">
+    <div class="num"><%= total ? Math.round(counts.approved / total * 100) : 0 %>%</div>
+    <div class="lbl">Approval rate</div>
+  </div>
+</div>
+
+<div class="panel mt">
+  <h2>Daily submissions · last 30 days</h2>
+  <div class="bars" aria-hidden="true">
+    <% const maxDaily = Math.max(1, ...daily.map(d => d.count)); %>
+    <% for (const d of daily) { %>
+      <div class="bar <%= d.count === 0 ? 'zero' : '' %>" style="height:<%= Math.max(3, Math.round(d.count / maxDaily * 100)) %>%">
+        <span class="tip"><%= d.day %> · <%= d.count %></span>
+      </div>
+    <% } %>
+  </div>
+  <div class="bar-labels">
+    <% for (const d of daily) { %><span><%= d.day.slice(8) %></span><% } %>
+  </div>
+</div>
+
+<div class="panel mt">
+  <h2>By position</h2>
+  <div class="table-wrap" style="border:none;background:none">
+    <table class="data" style="min-width:0">
+      <thead><tr><th>Position</th><th>Total</th><th>In progress</th><th>Approved</th><th>Rejected</th></tr></thead>
+      <tbody>
+        <% for (const p of positions) { %>
+          <tr>
+            <td><%= p.title %></td>
+            <td><%= p.total %></td>
+            <td><%= p.in_progress %></td>
+            <td><%= p.approved %></td>
+            <td><%= p.rejected %></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

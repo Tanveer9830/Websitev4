@@ -1,0 +1,69 @@
+<%- include('../partials/head', { title, active: 'owner' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Database backups</h1>
+    <p class="muted small mb0">Consistent online backups (SQLite VACUUM INTO), newest first. Up to 10 are kept automatically.</p>
+  </div>
+  <div class="dash-tabs" role="navigation" aria-label="Dashboards">
+    <a href="/admin">Admin</a>
+    <a href="/admin/owner" class="active">Owner</a>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Create a backup</h2>
+  <form method="post" action="/admin/owner/backups/create" class="flex" data-quiet="1">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <button class="btn btn-primary" type="submit">
+      <span class="spinner" aria-hidden="true"></span>
+      <span class="btn-label">Create backup now</span>
+    </button>
+    <span class="faint small">Stored in <code class="inline"><%= backupDir %></code></span>
+  </form>
+</div>
+
+<div class="panel mt">
+  <h2>Backups <span class="count"><%= backups.length %></span></h2>
+  <% if (backups.length === 0) { %>
+    <p class="muted small mb0">No backups yet — create the first one.</p>
+  <% } else { %>
+    <div class="table-wrap" style="border:none;background:none">
+      <table class="data" style="min-width:0">
+        <thead><tr><th>File</th><th>Size</th><th>Created</th><th></th></tr></thead>
+        <tbody>
+          <% for (const b of backups) { %>
+            <tr>
+              <td class="mono small"><%= b.file %></td>
+              <td class="muted small"><%= b.size > 1048576 ? (b.size / 1048576).toFixed(1) + ' MB' : (b.size / 1024).toFixed(1) + ' KB' %></td>
+              <td class="muted small"><%= new Date(b.mtime).toLocaleString() %></td>
+              <td>
+                <div class="row-actions">
+                  <form method="post" action="/admin/owner/backups/<%= b.file %>/verify" data-quiet="1" style="display:inline">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="btn btn-ghost btn-sm" type="submit">Verify integrity</button>
+                  </form>
+                  <a class="btn btn-ghost btn-sm" href="/admin/owner/backups/<%= b.file %>/download">Download</a>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<div class="panel mt">
+  <h2>Restore procedure (manual, documented)</h2>
+  <ol class="small muted" style="margin:0;padding-left:20px;line-height:2">
+    <li>Download the desired backup from the table above.</li>
+    <li>Stop the service: <code class="inline">sudo systemctl stop top-cloud</code></li>
+    <li>Replace the database: <code class="inline">sudo cp /var/lib/top-cloud/topcloud.db /var/lib/top-cloud/topcloud.db.failed-$(date +%s) &amp;&amp; sudo cp ./backup-file.db /var/lib/top-cloud/topcloud.db</code></li>
+    <li>Fix ownership if you ran it as root: <code class="inline">sudo chown top-cloud:top-cloud /var/lib/top-cloud/topcloud.db</code></li>
+    <li>Start the service: <code class="inline">sudo systemctl start top-cloud</code> and check <code class="inline">curl -fsS http://127.0.0.1:<%= port %>/health</code></li>
+  </ol>
+</div>
+
+<%- include('../partials/footer') %>

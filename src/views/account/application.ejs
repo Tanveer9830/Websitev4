@@ -1,0 +1,60 @@
+<%- include('../partials/head', { title, active: 'account' }) %>
+<%- include('../partials/flash') %>
+
+<p class="small"><a href="/account">← My applications</a></p>
+
+<div class="card" style="padding:26px;margin-bottom:16px">
+  <div class="flex-between">
+    <div>
+      <div class="meta mb0">Reference <span class="ref"><%= app.reference %></span> · submitted <%= new Date(app.created_at).toLocaleString() %></div>
+      <h1 style="font-size:24px;margin:8px 0 0"><%= app.position_title %></h1>
+    </div>
+    <span class="badge badge-<%= app.status %>"><%= statusLabels[app.status] || app.status %></span>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div>
+    <div class="panel">
+      <h2>Your answers</h2>
+      <% if (answerEntries.length === 0) { %><p class="muted small">No answers recorded.</p><% } %>
+      <% for (const a of answerEntries) { %>
+        <div class="answer-row">
+          <div class="a-label"><%= a.label %></div>
+          <div class="a-value"><%= a.value %></div>
+        </div>
+      <% } %>
+    </div>
+
+    <% if (messages.length) { %>
+      <div class="panel mt">
+        <h2>Messages from staff <span class="count"><%= messages.length %></span></h2>
+        <% for (const m of messages) { %>
+          <div class="msg-card">
+            <div class="m-meta"><%= new Date(m.at).toLocaleString() %></div>
+            <div style="white-space:pre-wrap"><%= m.body %></div>
+          </div>
+        <% } %>
+      </div>
+    <% } else { %>
+      <div class="panel mt">
+        <h2>Messages from staff</h2>
+        <p class="muted small mb0">No messages yet. When the team has an update or a decision, it will appear here.</p>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="panel">
+    <h2>Status history</h2>
+    <ul class="timeline">
+      <% for (const h of history) { %>
+        <li>
+          <div class="t-what"><%= statusLabels[h.to_status] || h.to_status %></div>
+          <div class="t-when"><%= new Date(h.at).toLocaleString() %></div>
+        </li>
+      <% } %>
+    </ul>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

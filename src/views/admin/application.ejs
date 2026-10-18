@@ -1,0 +1,139 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<p class="small"><a href="/admin/applications">← All applications</a></p>
+
+<div class="card" style="padding:26px;margin-bottom:16px">
+  <div class="flex-between">
+    <div>
+      <div class="meta mb0">Reference <span class="ref"><%= app.reference %></span> · submitted <%= new Date(app.created_at).toLocaleString() %> by <b style="color:var(--text)"><%= app.applicant_name %></b> (@<%= app.applicant_username %>)</div>
+      <h1 style="font-size:24px;margin:8px 0 0"><%= app.position_title %></h1>
+    </div>
+    <div class="row-actions">
+      <span class="badge badge-<%= app.status %>"><%= statusLabels[app.status] %></span>
+    </div>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div>
+    <div class="panel">
+      <h2>Answers</h2>
+      <% if (answerEntries.length === 0) { %><p class="muted small">No answers recorded.</p><% } %>
+      <% for (const a of answerEntries) { %>
+        <div class="answer-row">
+          <div class="a-label"><%= a.label %></div>
+          <div class="a-value"><%= a.value %></div>
+        </div>
+      <% } %>
+    </div>
+
+    <% if (canReview) { %>
+      <div class="panel mt">
+        <h2>Actions</h2>
+        <form method="post" action="/admin/applications/<%= app.id %>/status" class="stack" style="gap:12px">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="filters" style="margin:0">
+            <div class="field">
+              <label for="a-status">New status</label>
+              <select id="a-status" name="status">
+                <option value="">— choose —</option>
+                <% for (const s of statuses) { %>
+                  <% if (s !== app.status) { %><option value="<%= s %>"><%= statusLabels[s] %></option><% } %>
+                <% } %>
+              </select>
+            </div>
+            <div class="field grow">
+              <label for="a-note">Note for the history <span class="hint" style="display:inline">(internal, optional)</span></label>
+              <input type="text" id="a-note" name="note" maxlength="500">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" type="submit" style="align-self:start">Update status</button>
+        </form>
+
+        <hr class="divider">
+
+        <form method="post" action="/admin/applications/<%= app.id %>/assign" class="stack" style="gap:12px">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="filters" style="margin:0">
+            <div class="field">
+              <label for="a-rev">Assigned reviewer</label>
+              <select id="a-rev" name="reviewer">
+                <option value="">— unassigned —</option>
+                <% for (const rv of reviewers) { %>
+                  <option value="<%= rv.id %>" <%= app.reviewer_id === rv.id ? 'selected' : '' %>>@<%= rv.username %> (<%= rv.role %>)</option>
+                <% } %>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="submit" style="align-self:start">Save assignment</button>
+        </form>
+
+        <hr class="divider">
+
+        <form method="post" action="/admin/applications/<%= app.id %>/notes" class="stack" style="gap:10px">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="field">
+            <label for="a-innote">Add internal note <span class="faint small">(staff only — the applicant never sees this)</span></label>
+            <textarea id="a-innote" name="body" rows="3" maxlength="4000"></textarea>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="submit" style="align-self:start">Add note</button>
+        </form>
+
+        <hr class="divider">
+
+        <form method="post" action="/admin/applications/<%= app.id %>/messages" class="stack" style="gap:10px">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="field">
+            <label for="a-msg">Send message to applicant <span class="faint small">(visible to the applicant in their dashboard)</span></label>
+            <textarea id="a-msg" name="body" rows="3" maxlength="4000"></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" type="submit" style="align-self:start">Send message</button>
+        </form>
+      </div>
+    <% } else { %>
+      <div class="panel mt">
+        <p class="muted small mb0">You have view-only access. An administrator or the owner can update this application.</p>
+      </div>
+    <% } %>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Status history</h2>
+      <ul class="timeline">
+        <% for (const h of history) { %>
+          <li>
+            <div class="t-what"><%= statusLabels[h.to_status] || h.to_status %></div>
+            <% if (h.note) { %><div class="small muted"><%= h.note %></div><% } %>
+            <div class="t-when"><%= new Date(h.at).toLocaleString() %><%= h.actor_label ? ' · by ' + h.actor_label : '' %></div>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+
+    <div class="panel mt">
+      <h2>Internal notes <span class="count">staff only</span></h2>
+      <% if (notes.length === 0) { %><p class="muted small mb0">No internal notes yet.</p><% } %>
+      <% for (const n of notes) { %>
+        <div class="note-card staff-only">
+          <div class="n-meta"><span><%= n.author_label %></span><span><%= new Date(n.at).toLocaleString() %></span></div>
+          <div style="white-space:pre-wrap"><%= n.body %></div>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="panel mt">
+      <h2>Applicant messages <span class="count"><%= messages.length %></span></h2>
+      <% if (messages.length === 0) { %><p class="muted small mb0">No messages sent yet.</p><% } %>
+      <% for (const m of messages) { %>
+        <div class="msg-card">
+          <div class="m-meta"><%= new Date(m.at).toLocaleString() %><%= m.sender ? ' · by ' + m.sender : '' %></div>
+          <div style="white-space:pre-wrap"><%= m.body %></div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

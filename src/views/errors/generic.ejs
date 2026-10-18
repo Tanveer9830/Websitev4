@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · TOP CLOUD</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="error-page">
+<main class="container" style="text-align:center;padding-top:90px">
+  <div class="faint mono" style="font-size:13px;letter-spacing:.3em"><%= code %></div>
+  <h1 style="font-size:44px;margin:10px 0 8px"><%= heading %></h1>
+  <p class="muted" style="max-width:480px;margin:0 auto 26px"><%= message %></p>
+  <div class="hero-cta" style="justify-content:center">
+    <a class="btn btn-primary" href="/">Back to home</a>
+    <a class="btn btn-ghost" href="javascript:history.back()">Go back</a>
+  </div>
+</main>
+<script src="/js/app.js"></script>
+</body>
+</html>

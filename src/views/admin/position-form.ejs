@@ -1,0 +1,47 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<div class="container-narrow">
+  <div class="card" style="padding:28px">
+    <h1 style="font-size:22px;margin:0 0 18px"><%= position ? 'Edit position' : 'New position' %></h1>
+    <form method="post" action="<%= position ? '/admin/positions/' + position.id : '/admin/positions' %>" class="stack" data-validate="1" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="field">
+        <label for="title">Title <span class="req">*</span></label>
+        <input type="text" id="title" name="title" required maxlength="120" value="<%= values.title %>" class="<%= errors.title ? 'invalid' : '' %>">
+        <% if (errors.title) { %><div class="field-error"><%= errors.title %></div><% } %>
+      </div>
+      <div class="field">
+        <label for="department">Department</label>
+        <input type="text" id="department" name="department" maxlength="80" value="<%= values.department %>">
+      </div>
+      <div class="field">
+        <label for="summary">Summary <span class="hint" style="display:inline">one line shown on cards</span></label>
+        <input type="text" id="summary" name="summary" maxlength="300" value="<%= values.summary %>">
+      </div>
+      <div class="field">
+        <label for="description">Full description</label>
+        <textarea id="description" name="description" rows="8" maxlength="6000"><%= values.description %></textarea>
+      </div>
+      <div class="field">
+        <label for="eligibility">Eligibility requirements</label>
+        <textarea id="eligibility" name="eligibility" rows="5" maxlength="2000" placeholder="One requirement per line"><%= values.eligibility %></textarea>
+      </div>
+      <div class="field">
+        <div class="check-row">
+          <input type="checkbox" id="open" name="open" value="1" <%= values.open ? 'checked' : '' %>>
+          <label for="open">Position is open for applications</label>
+        </div>
+      </div>
+      <div class="flex" style="justify-content:flex-end">
+        <a class="btn btn-ghost" href="/admin/positions">Cancel</a>
+        <button class="btn btn-primary" type="submit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-label"><%= position ? 'Save changes' : 'Create position' %></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

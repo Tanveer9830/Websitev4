@@ -1,0 +1,79 @@
+<%- include('../partials/head', { title, active: 'owner' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Staff &amp; permissions</h1>
+    <p class="muted small mb0">Granular, server-enforced permissions. The Super Owner's access is protected and cannot be reduced.</p>
+  </div>
+  <div class="dash-tabs" role="navigation" aria-label="Dashboards">
+    <a href="/admin">Admin</a>
+    <a href="/admin/owner" class="active">Owner</a>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table class="data" style="min-width:900px">
+    <thead>
+      <tr>
+        <th>User</th>
+        <% for (const p of permissions) { %><th title="<%= p %>"><%= p.split('.')[1] %></th><% } %>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const entry of permissionStates) { const u = entry.user; %>
+        <tr>
+          <td>
+            <form method="post" action="/admin/owner/staff/<%= u.id %>/update" class="stack" style="gap:6px">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <b><%= u.display_name %></b>
+              <div class="faint small">@<%= u.username %>
+                <% if (u.is_super) { %>
+                  · <span class="badge badge-role">Super Owner — protected</span>
+                <% } else { %>
+                  ·
+                  <select name="role" style="width:auto;display:inline;padding:2px 8px;font-size:12px">
+                    <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                    <option value="reviewer" <%= u.role === 'reviewer' ? 'selected' : '' %>>Reviewer</option>
+                  </select>
+                  ·
+                  <select name="active" style="width:auto;display:inline;padding:2px 8px;font-size:12px">
+                    <option value="1" <%= u.active ? 'selected' : '' %>>Active</option>
+                    <option value="0" <%= !u.active ? 'selected' : '' %>>Deactivated</option>
+                  </select>
+                  <button class="btn btn-ghost btn-sm" type="submit" data-confirm="Save role/status for @<%= u.username %>?">Save</button>
+                <% } %>
+              </div>
+            </form>
+          </td>
+          <% if (u.is_super) { %>
+            <% for (const p of permissions) { %><td><span class="faint">✓</span></td><% } %>
+            <td><span class="faint small">Protected</span></td>
+          <% } else { %>
+            <form method="post" action="/admin/owner/staff/<%= u.id %>/permissions">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <% for (const p of permissions) { %>
+                <td>
+                  <input type="hidden" name="perm_<%= p %>" value="0">
+                  <input type="checkbox" name="perm_<%= p %>" value="1" <%= entry.perms[p] ? 'checked' : '' %>
+                    aria-label="<%= p %> for @<%= u.username %>" style="width:16px;height:16px;accent-color:var(--primary)">
+                </td>
+              <% } %>
+              <td>
+                <button class="btn btn-ghost btn-sm" type="submit" data-confirm="Save permissions for @<%= u.username %>?">Apply</button>
+              </td>
+            </form>
+          <% } %>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<p class="faint small mt">
+  Default role permissions: <b>Admin</b> — applications view/review, forms, positions.
+  <b>Reviewer</b> — applications view/review. Check additional permissions to extend access; uncheck a default to deny it.
+</p>
+
+<%- include('../partials/footer') %>

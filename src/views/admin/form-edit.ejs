@@ -1,0 +1,40 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Form · <%= position.title %></h1>
+    <p class="muted small mb0">Edit the questions applicants will see. Supported types: text, long answer (textarea), dropdown, checkbox.</p>
+  </div>
+</div>
+
+<% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+
+<form method="post" action="/admin/forms/<%= position.id %>" id="formEditor" data-validate="1" novalidate>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <input type="hidden" name="fields_json" id="fieldsJson" value="">
+
+  <div class="panel">
+    <h2>Instructions <span class="count">shown to applicants above the form</span></h2>
+    <textarea name="instructions" rows="3" maxlength="1000"><%= form.instructions %></textarea>
+  </div>
+
+  <div class="panel mt">
+    <h2>Questions <span class="count" id="fieldCount"></span></h2>
+    <div id="fieldRows"></div>
+    <button type="button" class="btn btn-ghost btn-sm" id="addField" style="margin-top:10px">+ Add question</button>
+    <p class="faint small mt">Required questions are marked in the applicant form. Dropdown questions need at least two options (comma separated).</p>
+  </div>
+
+  <div class="flex" style="justify-content:flex-end;margin-top:18px">
+    <a class="btn btn-ghost" href="/admin/forms">Cancel</a>
+    <button class="btn btn-primary" type="submit">
+      <span class="spinner" aria-hidden="true"></span>
+      <span class="btn-label">Save form</span>
+    </button>
+  </div>
+</form>
+
+<script id="seedFields" type="application/json"><%- JSON.stringify(rawFields) %></script>
+
+<%- include('../partials/footer') %>

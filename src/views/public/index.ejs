@@ -1,0 +1,67 @@
+<%- include('../partials/head', { title, active: 'home' }) %>
+
+<section class="hero">
+  <div class="hero-badge"><span class="dot <%= settings.applications_open ? '' : 'off' %>"></span>
+    <%= settings.applications_open ? 'APPLICATIONS OPEN' : 'APPLICATIONS CLOSED' %>
+  </div>
+  <h1 class="hero-title">
+    Join the team behind<br><span class="grad">TOP CLOUD</span>
+  </h1>
+  <p class="hero-sub">
+    We are building the friendliest, most reliable cloud hosting community on the internet — and
+    we are looking for people to grow with us. Browse open staff positions, apply in minutes,
+    and track your application from start to decision.
+  </p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="/positions">Browse open positions</a>
+    <a class="btn btn-ghost" href="/recruitments">How recruitment works</a>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2 class="section-title">Open positions <span class="thin"><%= openCount %></span></h2>
+    <a class="btn btn-ghost btn-sm" href="/positions">View all</a>
+  </div>
+  <% if (positions.length === 0) { %>
+    <div class="empty">
+      <div class="icon">☁️</div>
+      <h3>No open positions right now</h3>
+      <p>Check back soon — new roles are posted regularly.</p>
+      <a class="btn btn-primary" href="/recruitments">Learn how recruitment works</a>
+    </div>
+  <% } else { %>
+    <div class="grid grid-3">
+      <% for (const p of positions) { %>
+        <a class="card lift" href="/positions/<%= p.id %>" style="text-decoration:none;color:inherit;display:block">
+          <div class="flex-between mb0">
+            <span class="badge badge-open">Open</span>
+            <span class="meta"><%= p.department %></span>
+          </div>
+          <h3 style="margin-top:10px"><%= p.title %></h3>
+          <p class="muted small mb0"><%= p.summary %></p>
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+</section>
+
+<section>
+  <div class="section-head"><h2 class="section-title">Why staff with TOP CLOUD</h2></div>
+  <div class="grid grid-3">
+    <div class="card lift">
+      <h3>Real responsibility</h3>
+      <p class="muted small mb0">Every role has genuine ownership: real customers, real decisions, real growth — not a decorative title.</p>
+    </div>
+    <div class="card lift">
+      <h3>Transparent process</h3>
+      <p class="muted small mb0">You see every status of your application, every message from staff, and the final decision — in your dashboard.</p>
+    </div>
+    <div class="card lift">
+      <h3>Grow into more</h3>
+      <p class="muted small mb0">Strong staff are promoted from within. Many senior roles started as a first application on this portal.</p>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

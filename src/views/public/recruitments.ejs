@@ -1,0 +1,55 @@
+<%- include('../partials/head', { title, active: 'recruitments' }) %>
+
+<div class="container-narrow">
+  <div class="hero" style="padding-bottom:8px">
+    <h1 class="hero-title" style="font-size:clamp(28px,4vw,40px)">How recruitment works</h1>
+    <p class="hero-sub">Everything you need to know before you apply — who can apply, what the process looks like, and what happens after you submit.</p>
+  </div>
+
+  <div class="grid" style="gap:14px">
+    <div class="panel">
+      <h2>1 · Create an account</h2>
+      <p class="muted small mb0">Register with your username, email and a strong password. One account tracks all of your applications and every message from the staff team.</p>
+    </div>
+    <div class="panel">
+      <h2>2 · Pick a position and apply</h2>
+      <p class="muted small mb0">Every position has its own application form built by the team. Answer the questions honestly — the answers are what reviewers work with, and incomplete or false answers lead to rejection.</p>
+    </div>
+    <div class="panel">
+      <h2>3 · Track it from your dashboard</h2>
+      <p class="muted small mb0">You get a unique reference number on submission. Your dashboard shows the current status, the full history of changes, and any messages from staff.</p>
+    </div>
+    <div class="panel">
+      <h2>4 · The decision</h2>
+      <p class="muted small mb0">Applications move through <span class="mono small">Pending → Reviewing → Under Consideration</span> and end in <b style="color:var(--ok)">Approved</b> or <b style="color:var(--err)">Rejected</b>. Decisions are always communicated through the portal — if you approved, you will also receive next-step instructions there.</p>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <h2>General eligibility</h2>
+    <ul class="muted small" style="margin:0;padding-left:20px">
+      <li>You must be at least 18 years old.</li>
+      <li>You must be able to communicate clearly in English.</li>
+      <li>You must be available for the hours listed in the position.</li>
+      <li>You must treat customers and team members with respect.</li>
+      <li>Each position lists its own additional requirements — read them before applying.</li>
+    </ul>
+  </div>
+
+  <div class="panel" style="margin-top:14px">
+    <h2>Application instructions</h2>
+    <ul class="muted small" style="margin:0;padding-left:20px">
+      <li>One active application per position — wait for the current one to be reviewed before reapplying.</li>
+      <li>Answers are validated on submission; fix highlighted errors and resubmit.</li>
+      <li>Save a copy of your reference number (e.g. <code class="inline">TC-2026-9F3A2B</code>) — it identifies your application.</li>
+      <li>You can change your password at any time from your dashboard.</li>
+    </ul>
+  </div>
+
+  <div class="hero-cta" style="margin-top:26px">
+    <a class="btn btn-primary" href="/positions">Browse open positions</a>
+    <% if (!user) { %><a class="btn btn-ghost" href="/register">Create an account</a><% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
