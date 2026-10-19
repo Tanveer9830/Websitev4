@@ -1,0 +1,84 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Applications</h1>
+    <p class="muted small mb0"><%= total %> application<%= total === 1 ? '' : 's' %> match the current filters.</p>
+  </div>
+  <div class="dash-tabs" role="navigation" aria-label="Dashboards">
+    <a href="/admin" class="active">Admin</a>
+    <% if (isSuper) { %><a href="/admin/owner">Owner</a><% } %>
+  </div>
+</div>
+
+<form method="get" action="/admin/applications" class="filters">
+  <div class="field grow">
+    <label for="f-q">Search</label>
+    <input type="text" id="f-q" name="q" value="<%= q.search || '' %>" placeholder="Reference, applicant, position…">
+  </div>
+  <div class="field">
+    <label for="f-status">Status</label>
+    <select id="f-status" name="status">
+      <option value="">All</option>
+      <% for (const s of statuses) { %>
+        <option value="<%= s %>" <%= q.status === s ? 'selected' : '' %>><%= statusLabels[s] %></option>
+      <% } %>
+    </select>
+  </div>
+  <div class="field">
+    <label for="f-pos">Position</label>
+    <select id="f-pos" name="position">
+      <option value="">All</option>
+      <% for (const p of positions) { %>
+        <option value="<%= p.id %>" <%= q.positionId === p.id ? 'selected' : '' %>><%= p.title %></option>
+      <% } %>
+    </select>
+  </div>
+  <div class="field">
+    <label for="f-rev">Reviewer</label>
+    <select id="f-rev" name="reviewer">
+      <option value="">Any</option>
+      <% for (const r of reviewers) { %>
+        <option value="<%= r.id %>" <%= q.reviewerId === r.id ? 'selected' : '' %>>@<%= r.username %></option>
+      <% } %>
+    </select>
+  </div>
+  <button class="btn btn-ghost btn-sm" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/applications">Reset</a>
+</form>
+
+<% if (rows.length === 0) { %>
+  <div class="empty">
+    <div class="icon">🔍</div>
+    <h3>No applications match</h3>
+    <p>Try adjusting or clearing the filters.</p>
+  </div>
+<% } else { %>
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+        <tr>
+          <th>Reference</th><th>Applicant</th><th>Position</th><th>Status</th><th>Reviewer</th><th>Submitted</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (const a of rows) { %>
+          <tr>
+            <td><span class="ref"><%= a.reference %></span></td>
+            <td><%= a.applicant_name %><div class="faint small">@<%= a.applicant_username %></div></td>
+            <td><%= a.position_title %></td>
+            <td><span class="badge badge-<%= a.status %>"><%= statusLabels[a.status] %></span></td>
+            <td><% if (a.reviewer_name) { %><%= a.reviewer_name %><% } else { %><span class="faint small">Unassigned</span><% } %></td>
+            <td class="muted small"><%= new Date(a.created_at).toLocaleDateString() %></td>
+            <td><a class="btn btn-ghost btn-sm" href="/admin/applications/<%= a.id %>">Open</a></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/pagination', { total, perPage, page, reqUrl: reqUrl }) %>
+
+<%- include('../partials/footer') %>

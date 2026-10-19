@@ -1,0 +1,66 @@
+<%- include('../partials/head', { title, active: 'positions' }) %>
+
+<div class="container-narrow">
+  <div class="card" style="padding:30px">
+    <div class="meta mb0"><a href="/positions">All positions</a> / <a href="/positions/<%= position.id %>"><%= position.department %></a></div>
+    <h1 style="font-size:26px;margin:10px 0 2px">Application — <%= position.title %></h1>
+    <% if (form.instructions) { %><p class="muted small" style="margin-bottom:18px"><%= form.instructions %></p><% } %>
+
+    <form method="post" action="/apply/<%= position.id %>" class="stack" data-validate="1" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <% for (const f of form.fields) { %>
+        <div class="field">
+          <% if (f.type === 'checkbox') { %>
+            <div class="check-row">
+              <input type="checkbox" id="f_<%= f.key %>" name="<%= f.key %>" value="yes"
+                <%= (values[f.key] === 'yes') ? 'checked' : '' %>>
+              <label for="f_<%= f.key %>"><%= f.label %></label>
+            </div>
+          <% } else { %>
+            <label for="f_<%= f.key %>">
+              <%= f.label %>
+              <% if (f.required) { %><span class="req" aria-hidden="true"> *</span><% } %>
+            </label>
+            <% if (f.type === 'select') { %>
+              <select id="f_<%= f.key %>" name="<%= f.key %>" <%= f.required ? 'required' : '' %>
+                class="<%= fieldErrors[f.key] ? 'invalid' : '' %>">
+                <option value="">— Choose an option —</option>
+                <% for (const opt of (f.options || [])) { %>
+                  <option value="<%= opt %>" <%= values[f.key] === opt ? 'selected' : '' %>>
+                    <%= opt %>
+                  </option>
+                <% } %>
+              </select>
+            <% } else if (f.type === 'textarea') { %>
+              <textarea id="f_<%= f.key %>" name="<%= f.key %>" rows="5"
+                placeholder="<%= f.placeholder || '' %>"
+                <%= f.required ? 'required' : '' %>
+                class="<%= fieldErrors[f.key] ? 'invalid' : '' %>"><%= values[f.key] || '' %></textarea>
+            <% } else { %>
+              <input type="text" id="f_<%= f.key %>" name="<%= f.key %>" value="<%= values[f.key] || '' %>"
+                placeholder="<%= f.placeholder || '' %>" maxlength="2000"
+                <%= f.required ? 'required' : '' %>
+                class="<%= fieldErrors[f.key] ? 'invalid' : '' %>">
+            <% } %>
+            <% if (f.help) { %><div class="hint"><%= f.help %></div><% } %>
+            <% if (fieldErrors[f.key]) { %><div class="field-error" role="alert"><%= fieldErrors[f.key] %></div><% } %>
+          <% } %>
+        </div>
+      <% } %>
+
+      <div class="flex" style="justify-content:space-between">
+        <a class="btn btn-ghost" href="/positions/<%= position.id %>">Cancel</a>
+        <button class="btn btn-primary" type="submit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-label">Submit application</span>
+        </button>
+      </div>
+    </form>
+  </div>
+  <p class="faint small" style="text-align:center;margin-top:14px">
+    Your answers are stored securely and reviewed only by the TOP CLOUD staff team.
+  </p>
+</div>
+
+<%- include('../partials/footer') %>

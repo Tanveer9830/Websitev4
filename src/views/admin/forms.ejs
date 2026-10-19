@@ -1,0 +1,38 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Application forms</h1>
+    <p class="muted small mb0">Each position has its own configurable form. Changes go live immediately for new applicants.</p>
+  </div>
+</div>
+
+<% if (positions.length === 0) { %>
+  <div class="empty">
+    <div class="icon">📝</div>
+    <h3>No positions yet</h3>
+    <p>Create a position first — its form will appear here.</p>
+    <a class="btn btn-primary" href="/admin/positions/new">Create a position</a>
+  </div>
+<% } else { %>
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+        <tr><th>Position</th><th>Questions</th><th>Form updated</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% for (const p of positions) { %>
+          <tr>
+            <td><b><%= p.title %></b> <span class="muted small">· <%= p.department %></span></td>
+            <td><% if (p.form) { %><%= p.form.fieldCount %> questions<% } else { %><span class="faint small">default</span><% } %></td>
+            <td class="muted small"><%= p.form ? new Date(p.form.updated_at).toLocaleString() : '—' %></td>
+            <td><a class="btn btn-ghost btn-sm" href="/admin/forms/<%= p.id %>">Edit form</a></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

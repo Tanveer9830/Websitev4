@@ -1,0 +1,44 @@
+<%- include('../partials/head', { title, active: 'positions' }) %>
+
+<div class="container-narrow">
+  <div class="card" style="padding:30px">
+    <div class="flex-between mb0">
+      <span class="badge <%= position.open ? 'badge-open' : 'badge-closed' %>"><%= position.open ? 'Open' : 'Closed' %></span>
+      <span class="meta"><%= position.department %></span>
+    </div>
+    <h1 style="font-size:30px;margin:14px 0 4px"><%= position.title %></h1>
+    <p class="muted"><%= position.summary %></p>
+
+    <hr class="divider">
+
+    <h2 style="font-size:17px;margin-bottom:10px">About the role</h2>
+    <div class="muted small" style="white-space:pre-wrap"><%= position.description %></div>
+
+    <% if (position.eligibility) { %>
+      <hr class="divider">
+      <h2 style="font-size:17px;margin-bottom:10px">Eligibility requirements</h2>
+      <div class="small" style="white-space:pre-wrap"><%= position.eligibility %></div>
+    <% } %>
+
+    <hr class="divider">
+    <% if (applied) { %>
+      <div class="form-note">
+        You already have an active application for this position. Track its progress in
+        <a href="/account">your dashboard</a>.
+      </div>
+    <% } else if (!position.open) { %>
+      <div class="form-note">This position is currently closed for new applications.</div>
+    <% } else { %>
+      <div class="hero-cta">
+        <% if (user && user.role === 'applicant') { %>
+          <a class="btn btn-primary" href="/apply/<%= position.id %>">Apply for this position</a>
+        <% } else if (!user) { %>
+          <a class="btn btn-primary" href="/login?next=/apply/<%= position.id %>">Sign in to apply</a>
+          <a class="btn btn-ghost" href="/register">Create an account</a>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

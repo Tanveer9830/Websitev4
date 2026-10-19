@@ -1,0 +1,67 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Admin dashboard</h1>
+    <p class="muted small mb0">Review queue, application pipeline and quick actions.</p>
+  </div>
+  <div class="dash-tabs" role="navigation" aria-label="Dashboards">
+    <a href="/admin" class="active">Admin</a>
+    <% if (isSuper) { %><a href="/admin/owner">Owner</a><% } %>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <% for (const s of Object.keys(counts)) { %>
+    <div class="card stat">
+      <div class="num"><%= counts[s] %></div>
+      <div class="lbl"><%= statusLabels[s] %></div>
+    </div>
+  <% } %>
+</div>
+
+<div class="detail-grid mt">
+  <div class="panel">
+    <h2>Recent applications <span class="count">latest <%= recent.length %></span></h2>
+    <% if (recent.length === 0) { %>
+      <p class="muted small mb0">No applications yet.</p>
+    <% } else { %>
+      <div class="table-wrap" style="border:none;background:none">
+        <table class="data" style="min-width:0">
+          <thead><tr><th>Ref</th><th>Applicant</th><th>Position</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% for (const a of recent) { %>
+              <tr>
+                <td><span class="ref"><%= a.reference %></span></td>
+                <td><%= a.applicant_name %></td>
+                <td><%= a.position_title %></td>
+                <td><span class="badge badge-<%= a.status %>"><%= statusLabels[a.status] %></span></td>
+                <td><a class="btn btn-ghost btn-sm" href="/admin/applications/<%= a.id %>">Open</a></td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+    <a class="btn btn-ghost btn-sm mt" href="/admin/applications">View all applications →</a>
+  </div>
+
+  <div class="panel">
+    <h2>Assigned to me</h2>
+    <% if (myQueue.length === 0) { %>
+      <p class="muted small mb0">Nothing assigned to you yet. Applications you review will show up here.</p>
+    <% } else { %>
+      <ul class="timeline">
+        <% for (const a of myQueue) { %>
+          <li>
+            <div class="t-what"><a href="/admin/applications/<%= a.id %>"><%= a.reference %></a> · <%= a.position_title %></div>
+            <div class="t-when"><%= a.applicant_name %> · <span class="badge badge-<%= a.status %>"><%= statusLabels[a.status] %></span></div>
+          </li>
+        <% } %>
+      </ul>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

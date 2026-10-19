@@ -1,0 +1,108 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Staff management</h1>
+    <p class="muted small mb0">Administrators and reviewers, with granular permissions. You cannot demote or deactivate the Super Owner.</p>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="panel">
+    <h2>Team</h2>
+    <% if (staff.length === 0) { %>
+      <p class="muted small">No staff accounts yet.</p>
+    <% } else { %>
+      <div class="table-wrap" style="border:none;background:none">
+        <table class="data" style="min-width:0">
+          <thead><tr><th>User</th><th>Role</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% for (const u of staff) { %>
+              <tr>
+                <td>
+                  <b><%= u.display_name %></b>
+                  <div class="faint small">@<%= u.username %> · <%= u.email %></div>
+                </td>
+                <td>
+                  <span class="badge badge-role"><%= u.is_super ? 'Super Owner' : u.role %></span>
+                  <% if (u.must_change_pw) { %><span class="badge badge-pending" style="margin-left:4px">must change pw</span><% } %>
+                </td>
+                <td><span class="badge <%= u.active ? 'badge-open' : 'badge-closed' %>"><%= u.active ? 'Active' : 'Deactivated' %></span></td>
+                <td>
+                  <% if (!u.is_super) { %>
+                    <details style="display:inline">
+                      <summary class="btn btn-ghost btn-sm" style="cursor:pointer;list-style:none">Manage</summary>
+                      <form method="post" action="/admin/staff/<%= u.id %>/update" class="stack" style="gap:8px;margin-top:10px;min-width:230px">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="field">
+                          <label for="dn-<%= u.id %>">Display name</label>
+                          <input type="text" id="dn-<%= u.id %>" name="display_name" value="<%= u.display_name %>" maxlength="80">
+                        </div>
+                        <div class="field">
+                          <label for="role-<%= u.id %>">Role</label>
+                          <select id="role-<%= u.id %>" name="role">
+                            <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                            <option value="reviewer" <%= u.role === 'reviewer' ? 'selected' : '' %>>Reviewer</option>
+                          </select>
+                        </div>
+                        <div class="field">
+                          <label for="active-<%= u.id %>">Status</label>
+                          <select id="active-<%= u.id %>" name="active">
+                            <option value="1" <%= u.active ? 'selected' : '' %>>Active</option>
+                            <option value="0" <%= !u.active ? 'selected' : '' %>>Deactivated</option>
+                          </select>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" type="submit" data-confirm="Save changes for @<%= u.username %>?">Save</button>
+                      </form>
+                    </details>
+                  <% } else { %>
+                    <span class="faint small">Protected</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="panel">
+    <h2>Create staff account</h2>
+    <form method="post" action="/admin/staff" class="stack" data-validate="1" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="field">
+        <label for="new-username">Username <span class="req">*</span></label>
+        <input type="text" id="new-username" name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z0-9._-]+">
+      </div>
+      <div class="field">
+        <label for="new-email">Email <span class="req">*</span></label>
+        <input type="email" id="new-email" name="email" required maxlength="200">
+      </div>
+      <div class="field">
+        <label for="new-display">Display name <span class="req">*</span></label>
+        <input type="text" id="new-display" name="display_name" required minlength="2" maxlength="80">
+      </div>
+      <div class="field">
+        <label for="new-password">Temporary password <span class="req">*</span></label>
+        <input type="password" id="new-password" name="password" required minlength="10" autocomplete="new-password">
+        <div class="hint">Share it over a secure channel — they will be asked to change it at login.</div>
+      </div>
+      <div class="field">
+        <label for="new-role">Role <span class="req">*</span></label>
+        <select id="new-role" name="role">
+          <option value="reviewer">Reviewer — reviews applications</option>
+          <option value="admin">Admin — broader management tools</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit" style="align-self:start">Create account</button>
+    </form>
+    <div class="form-note mt">
+      Granular permissions for each user are configured from the
+      <b>Owner → Staff &amp; permissions</b> page.
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

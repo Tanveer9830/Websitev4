@@ -1,0 +1,57 @@
+<%- include('../partials/head', { title, active: 'owner' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Audit log</h1>
+    <p class="muted small mb0"><%= total %> privileged actions recorded.</p>
+  </div>
+  <div class="dash-tabs" role="navigation" aria-label="Dashboards">
+    <a href="/admin">Admin</a>
+    <a href="/admin/owner" class="active">Owner</a>
+  </div>
+</div>
+
+<form method="get" action="/admin/owner/audit" class="filters">
+  <div class="field grow">
+    <label for="aq">Search (user, target, detail)</label>
+    <input type="text" id="aq" name="q" value="<%= q %>">
+  </div>
+  <div class="field">
+    <label for="aaction">Action</label>
+    <select id="aaction" name="action">
+      <option value="">All</option>
+      <% for (const a of actions) { %>
+        <option value="<%= a %>" <%= action === a ? 'selected' : '' %>><%= a %></option>
+      <% } %>
+    </select>
+  </div>
+  <button class="btn btn-ghost btn-sm" type="submit">Filter</button>
+  <a class="btn btn-ghost btn-sm" href="/admin/owner/audit">Reset</a>
+</form>
+
+<% if (rows.length === 0) { %>
+  <div class="empty"><div class="icon">🧾</div><h3>No audit entries</h3><p>Privileged actions will appear here as they happen.</p></div>
+<% } else { %>
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>When</th><th>User</th><th>Action</th><th>Target</th><th>Detail</th><th>IP</th></tr></thead>
+      <tbody>
+        <% for (const r of rows) { %>
+          <tr>
+            <td class="muted small" style="white-space:nowrap"><%= new Date(r.at).toLocaleString() %></td>
+            <td><%= r.user_label %></td>
+            <td><code class="inline"><%= r.action %></code></td>
+            <td class="mono small"><%= r.target %></td>
+            <td class="faint small mono" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<%= r.detail %>"><%= r.detail %></td>
+            <td class="muted small"><%= r.ip || '—' %></td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/pagination', { total, perPage, page, reqUrl: reqUrl }) %>
+
+<%- include('../partials/footer') %>

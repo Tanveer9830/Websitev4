@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> · TOP CLOUD</title>
+  <meta name="description" content="TOP CLOUD Staff Recruitment Portal — apply for staff positions. Made by Tanveer.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%98%81%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <nav class="nav container" aria-label="Main navigation">
+    <a class="brand" href="/">
+      <span class="brand-name">TOP CLOUD</span>
+      <span class="brand-sub"><%= (settings && settings.site_tagline) || 'STAFF RECRUITMENT PORTAL' %></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">☰</button>
+    <div class="nav-links" id="navLinks">
+      <% const s = settings || { site_name: 'TOP CLOUD' }; %>
+      <a href="/" class="<%= active === 'home' ? 'active' : '' %>">Home</a>
+      <a href="/positions" class="<%= active === 'positions' ? 'active' : '' %>">Positions</a>
+      <a href="/recruitments" class="<%= active === 'recruitments' ? 'active' : '' %>">How it works</a>
+      <% if (isStaff) { %>
+        <a href="/admin" class="<%= active === 'admin' ? 'active' : '' %>">Admin</a>
+        <% if (isSuper) { %><a href="/admin/owner" class="<%= active === 'owner' ? 'active' : '' %>">Owner</a><% } %>
+      <% } else if (user && user.role === 'applicant') { %>
+        <a href="/account" class="<%= active === 'account' ? 'active' : '' %>">My dashboard</a>
+      <% } else { %>
+        <a href="/login" class="<%= active === 'login' ? 'active' : '' %>">Sign in</a>
+        <a href="/register">Create account</a>
+      <% } %>
+      <div class="nav-user">
+        <% if (user) { %>
+          <span class="who">Signed in as <b><%= user.display_name %></b><% if (user.role !== 'applicant') { %> · <%= user.role %><% } %></span>
+          <form method="post" action="/logout" class="row-actions" data-quiet="1">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-ghost btn-sm" type="submit">Sign out</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+</header>
+<main id="main" class="container">

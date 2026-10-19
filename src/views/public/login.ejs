@@ -1,0 +1,30 @@
+<%- include('../partials/head', { title, active: 'login' }) %>
+
+<div class="auth-wrap">
+  <div class="card auth-card">
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to apply or track your application.</p>
+    <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+    <form method="post" action="/login<%= next ? '?next=' + encodeURIComponent(next) : '' %>" class="stack" data-validate="1" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% if (next) { %><input type="hidden" name="next" value="<%= next %>"><% } %>
+      <div class="field">
+        <label for="username">Username or email</label>
+        <input type="text" id="username" name="username" required autocomplete="username" autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" type="submit">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="btn-label">Sign in</span>
+      </button>
+    </form>
+    <div class="auth-alt">
+      New here? <a href="/register">Create an account</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

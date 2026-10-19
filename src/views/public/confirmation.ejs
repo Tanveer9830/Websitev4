@@ -1,0 +1,21 @@
+<%- include('../partials/head', { title, active: 'positions' }) %>
+
+<div class="confirm-wrap">
+  <div class="confirm-icon">✓</div>
+  <h1 style="font-size:28px;margin:0 0 8px">Application received</h1>
+  <p class="muted">
+    Thanks, <b style="color:var(--text)"><%= user.display_name %></b>. Your application for
+    <b style="color:var(--text)"><%= position.title %></b> has been submitted.
+  </p>
+  <div class="ref-big" aria-label="Application reference number"><%= application.reference %></div>
+  <p class="muted small" style="max-width:440px;margin:0 auto 24px">
+    Save this reference number. Track the status of your application, read messages from staff,
+    and see decisions anytime from your dashboard.
+  </p>
+  <div class="hero-cta" style="justify-content:center">
+    <a class="btn btn-primary" href="/account">Go to my dashboard</a>
+    <a class="btn btn-ghost" href="/positions">Browse more positions</a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

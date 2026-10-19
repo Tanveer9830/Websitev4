@@ -1,0 +1,51 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Positions</h1>
+    <p class="muted small mb0"><%= total %> position<%= total === 1 ? '' : 's' %>.</p>
+  </div>
+  <div class="row-actions">
+    <a class="btn btn-ghost btn-sm" href="/admin/forms">Manage forms</a>
+    <a class="btn btn-primary btn-sm" href="/admin/positions/new">+ New position</a>
+  </div>
+</div>
+
+<% if (rows.length === 0) { %>
+  <div class="empty">
+    <div class="icon"></div>
+    <h3>No positions yet</h3>
+    <p>Create the first position to open recruitment.</p>
+    <a class="btn btn-primary" href="/admin/positions/new">Create a position</a>
+  </div>
+<% } else { %>
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+        <tr><th>Title</th><th>Department</th><th>Status</th><th>Applications</th><th>Created</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% for (const p of rows) { %>
+          <tr>
+            <td><b><%= p.title %></b></td>
+            <td class="muted"><%= p.department %></td>
+            <td><span class="badge <%= p.open ? 'badge-open' : 'badge-closed' %>"><%= p.open ? 'Open' : 'Closed' %></span></td>
+            <td><%= p.applications_count || 0 %></td>
+            <td class="muted small"><%= new Date(p.created_at).toLocaleDateString() %></td>
+            <td>
+              <div class="row-actions">
+                <a class="btn btn-ghost btn-sm" href="/admin/positions/<%= p.id %>/edit">Edit</a>
+                <a class="btn btn-ghost btn-sm" href="/admin/forms/<%= p.id %>">Form</a>
+              </div>
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/pagination', { total, perPage, page, reqUrl: reqUrl }) %>
+
+<%- include('../partials/footer') %>

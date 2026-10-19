@@ -1,0 +1,93 @@
+<%- include('../partials/head', { title, active: 'owner' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Owner overview</h1>
+    <p class="muted small mb0">Live analytics for the entire recruitment pipeline.</p>
+  </div>
+  <div class="dash-tabs" role="navigation" aria-label="Dashboards">
+    <a href="/admin">Admin</a>
+    <a href="/admin/owner" class="active">Owner</a>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="card stat">
+    <div class="num"><%= total %></div>
+    <div class="lbl">Total applications</div>
+  </div>
+  <div class="card stat">
+    <div class="num"><%= counts.pending + counts.reviewing + counts.under_consideration + counts.on_hold %></div>
+    <div class="lbl">In progress</div>
+  </div>
+  <div class="card stat">
+    <div class="num"><%= counts.approved %></div>
+    <div class="lbl">Approved</div>
+  </div>
+  <div class="card stat">
+    <div class="num"><%= applicants %></div>
+    <div class="lbl">Applicant accounts</div>
+  </div>
+</div>
+
+<div class="detail-grid mt">
+  <div class="panel">
+    <h2>Applications · last 14 days <a class="muted small" href="/admin/owner/analytics" style="font-weight:500">30-day view →</a></h2>
+    <div class="bars" aria-hidden="true">
+      <% const maxDaily = Math.max(1, ...daily.map(d => d.count)); %>
+      <% for (const d of daily) { %>
+        <div class="bar <%= d.count === 0 ? 'zero' : '' %>" style="height:<%= Math.max(3, Math.round(d.count / maxDaily * 100)) %>%">
+          <span class="tip"><%= d.day.slice(5) %> · <%= d.count %></span>
+        </div>
+      <% } %>
+    </div>
+    <div class="bar-labels">
+      <% for (const d of daily) { %><span><%= d.day.slice(8) %></span><% } %>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Status breakdown</h2>
+    <div class="kv">
+      <% for (const s of Object.keys(counts)) { %>
+        <dt><span class="badge badge-<%= s %>"><%= statusLabels[s] %></span></dt>
+        <dd><%= counts[s] %></dd>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<div class="detail-grid mt">
+  <div class="panel">
+    <h2>By position</h2>
+    <% if (positions.length === 0) { %><p class="muted small mb0">No positions yet.</p><% } else { %>
+      <div class="table-wrap" style="border:none;background:none">
+        <table class="data" style="min-width:0">
+          <thead><tr><th>Position</th><th>Applications</th><th>In progress</th></tr></thead>
+          <tbody>
+            <% for (const p of positions) { %>
+              <tr>
+                <td><%= p.title %><%= p.open ? '' : ' <span class="badge badge-closed">closed</span>' %></td>
+                <td><%= p.total %></td>
+                <td><%= p.in_progress %></td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="panel">
+    <h2>Team <a class="muted small" href="/admin/owner/staff" style="font-weight:500">manage →</a></h2>
+    <% for (const u of staff.slice(0, 8)) { %>
+      <div class="flex-between" style="padding:7px 0;border-bottom:1px solid rgba(27,37,71,.5)">
+        <span><b><%= u.display_name %></b> <span class="faint small">@<%= u.username %></span></span>
+        <span class="badge badge-role"><%= u.is_super ? 'Super Owner' : u.role %></span>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

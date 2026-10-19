@@ -1,0 +1,45 @@
+<%- include('../partials/head', { title, active: 'admin' }) %>
+<%- include('../partials/flash') %>
+
+<div class="dash-head">
+  <div>
+    <h1>Recruitment settings</h1>
+    <p class="muted small mb0">Control what applicants can see and do.</p>
+  </div>
+</div>
+
+<div class="container-narrow">
+  <form method="post" action="/admin/settings" class="card stack" style="padding:28px" data-validate="1" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field">
+      <label for="site_name">Site name</label>
+      <input type="text" id="site_name" name="site_name" value="<%= settings.site_name %>" maxlength="60">
+    </div>
+    <div class="field">
+      <label for="site_tagline">Tagline</label>
+      <input type="text" id="site_tagline" name="site_tagline" value="<%= settings.site_tagline %>" maxlength="60">
+    </div>
+    <div class="field">
+      <div class="check-row">
+        <input type="checkbox" id="applications_open" name="applications_open" value="1" <%= settings.applications_open ? 'checked' : '' %>>
+        <label for="applications_open">Applications open (applies to all positions)</label>
+      </div>
+    </div>
+    <div class="field">
+      <div class="check-row">
+        <input type="checkbox" id="registration_open" name="registration_open" value="1" <%= settings.registration_open ? 'checked' : '' %>>
+        <label for="registration_open">Allow new applicant registrations</label>
+      </div>
+    </div>
+    <div class="field">
+      <label for="public_contact">Public contact line (shown in the footer)</label>
+      <input type="text" id="public_contact" name="public_contact" value="<%= settings.public_contact %>" maxlength="120">
+    </div>
+    <button class="btn btn-primary" type="submit" style="align-self:start">
+      <span class="spinner" aria-hidden="true"></span>
+      <span class="btn-label">Save settings</span>
+    </button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>
